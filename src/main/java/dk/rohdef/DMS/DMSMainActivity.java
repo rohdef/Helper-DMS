@@ -1,11 +1,11 @@
 package dk.rohdef.DMS;
 
-import java.util.Date;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class DMSMainActivity extends Activity {
@@ -53,18 +54,55 @@ public class DMSMainActivity extends Activity {
     	
     	return true;
     }
-    
+
     public void timerClickHandler(View view) {
     	Button timerButton = (Button) findViewById(view.getId());
     	
-    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    	String username = preferences.getString("phone", "");
-    	// Date/time
-    	long timestamp = new Date().getTime();
-    	String signature = username+"\n"+timestamp;
-    	Toast.makeText(DMSMainActivity.this, signature, Toast.LENGTH_LONG).show();
+		long endTime = SystemClock.currentThreadTimeMillis() + (10*1000);
+    	
+    	Log.i("Button click", "Now is: " + SystemClock.currentThreadTimeMillis());
+    	Log.i("Button click", "Set to end at: " + endTime);
+    	TextView timerText = (TextView) findViewById(R.id.timerText);
+    	timerText.setText("1:00");
+    	DMSCountDown cd = new DMSCountDown(endTime);
+    	cd.start();
     	
     	timerButton.setText(getString(R.string.stopTimer));
     }
-}
+    
+    private class DMSCountDown extends CountDownTimer {
+    	private TextView timerText = (TextView) findViewById(R.id.timerText);
 
+    	public DMSCountDown(long millisInFuture) {
+			super(millisInFuture, 250);
+		}
+
+    	
+		@Override
+		public void onFinish() {
+			timerText.setText("END!");
+			
+			SharedPreferences preferences =
+					PreferenceManager.getDefaultSharedPreferences(DMSMainActivity.this);
+	    	String username = preferences.getString("phone", "");
+	    	// Date/time
+			long timestamp = SystemClock.currentThreadTimeMillis();
+			String signature = username+"\n"+timestamp;
+			signature = "rulle";
+			//192.168.2.166
+		}
+
+		@Override
+		public void onTick(long millisUntilFinished) {
+			int seconds = (int) millisUntilFinished/1000;
+			int minutes = seconds/60;
+			seconds = seconds%60;
+			
+			if (seconds < 10)
+				timerText.setText(minutes+":0"+seconds);
+			else
+				timerText.setText(minutes+":"+seconds);			
+		}
+    }
+    
+}

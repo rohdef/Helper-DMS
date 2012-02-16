@@ -5,11 +5,11 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/timerText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:text="00:00"
+        android:text="0:00"
         android:textAppearance="?android:attr/textAppearanceLarge" />
     
     <Button
