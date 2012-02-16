@@ -94,7 +94,7 @@ public class DMSMainActivity extends Activity {
 					new XMLRPCClient("http://192.168.2.166:8080/AlarmService/xmlrpc");
 			try {
 				boolean ok = ((Boolean) xmlRpcClient
-						.call("AlarmService.fireAlarm"));
+						.callEx("AlarmService.fireAlarm"));
 				Toast.makeText(DMSMainActivity.this, ""+ok, Toast.LENGTH_SHORT).show();
 			} catch (XMLRPCException e) {
 				Log.e("XML RPC call", "Failed", e);
