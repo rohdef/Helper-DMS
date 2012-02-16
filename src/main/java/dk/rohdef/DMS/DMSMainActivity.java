@@ -1,5 +1,8 @@
 package dk.rohdef.DMS;
 
+import java.util.GregorianCalendar;
+import java.util.UUID;
+
 import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
 
@@ -85,16 +88,20 @@ public class DMSMainActivity extends Activity {
 			
 			SharedPreferences preferences =
 					PreferenceManager.getDefaultSharedPreferences(DMSMainActivity.this);
+			// TODO argh, int please! (Or something similar)
 	    	String phone = preferences.getString("phone", "21680621");
-			long timestamp = SystemClock.currentThreadTimeMillis();
-			String signature = phone+"\n"+timestamp;
+			String uuid = UUID.randomUUID().toString();
+			String signature = phone+"\n"+uuid;
 			signature = "rulle";
 			
 			XMLRPCClient xmlRpcClient =
 					new XMLRPCClient("http://192.168.2.166:8080/AlarmService/xmlrpc");
 			try {
 				boolean ok = ((Boolean) xmlRpcClient
-						.callEx("AlarmService.fireAlarm"));
+						.callEx("AlarmService.fireAlarm",
+								Integer.parseInt(phone),
+								uuid,
+								signature));
 				Toast.makeText(DMSMainActivity.this, ""+ok, Toast.LENGTH_SHORT).show();
 			} catch (XMLRPCException e) {
 				Log.e("XML RPC call", "Failed", e);

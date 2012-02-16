@@ -237,7 +237,7 @@ AuthScope.ANY_REALM),
 	throws IllegalArgumentException, IllegalStateException, IOException {
 		StringWriter bodyWriter = new StringWriter();
 		serializer.setOutput(bodyWriter);
-		serializer.startDocument(null, null);
+		serializer.startDocument("UTF-8", null);
 		serializer.startTag(null, Tag.METHOD_CALL);
 		// set method name
 		serializer.startTag(null, Tag.METHOD_NAME).text(method).endTag(null, Tag.METHOD_NAME);
@@ -249,5 +249,4 @@ AuthScope.ANY_REALM),
 
 		return bodyWriter.toString();
 	}
-
 }
