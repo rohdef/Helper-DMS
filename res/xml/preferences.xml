@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="@string/preferences">
+        <EditTextPreference android:title="@string/phone" android:key="phone" android:summary="@string/phoneSummary"/>
+<!--         <Preference android:key="alarmTime" android:summary="@string/alarmTimeSummary" android:title="@string/alarmTime"/> -->
+    </PreferenceCategory>
+    
+
+</PreferenceScreen>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello DMS!</string>
+    <string name="app_name">DMS</string>
+    <string name="startTimer">Start timer</string>
+    <string name="stopTimer">Stop timer</string>
+    <string name="timeout">Timeout</string>
+    
+    <color name="myColor">#3399cc</color>
+</resources>

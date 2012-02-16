@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preferences">Preferences</string>
+    
+    <string name="general">General preferences</string>
+    <string name="phone">Phone number</string>
+    <string name="phoneSummary">The phone number you\'re registered at rohdef with.</string>
+    <string name="alarmTime">Alarm timeout</string>
+    <string name="alarmTimeSummary">The amount of time before rising the alarm.</string>
+</resources>
