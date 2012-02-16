@@ -1,5 +1,8 @@
 package dk.rohdef.DMS;
 
+import org.xmlrpc.android.XMLRPCClient;
+import org.xmlrpc.android.XMLRPCException;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -58,12 +61,10 @@ public class DMSMainActivity extends Activity {
     public void timerClickHandler(View view) {
     	Button timerButton = (Button) findViewById(view.getId());
     	
-		long endTime = SystemClock.currentThreadTimeMillis() + (10*1000);
+		long endTime = SystemClock.currentThreadTimeMillis() + (1*1000);
     	
     	Log.i("Button click", "Now is: " + SystemClock.currentThreadTimeMillis());
     	Log.i("Button click", "Set to end at: " + endTime);
-    	TextView timerText = (TextView) findViewById(R.id.timerText);
-    	timerText.setText("1:00");
     	DMSCountDown cd = new DMSCountDown(endTime);
     	cd.start();
     	
@@ -84,17 +85,25 @@ public class DMSMainActivity extends Activity {
 			
 			SharedPreferences preferences =
 					PreferenceManager.getDefaultSharedPreferences(DMSMainActivity.this);
-	    	String username = preferences.getString("phone", "");
-	    	// Date/time
+	    	String phone = preferences.getString("phone", "21680621");
 			long timestamp = SystemClock.currentThreadTimeMillis();
-			String signature = username+"\n"+timestamp;
+			String signature = phone+"\n"+timestamp;
 			signature = "rulle";
-			//192.168.2.166
+			
+			XMLRPCClient xmlRpcClient =
+					new XMLRPCClient("http://192.168.2.166:8080/AlarmService/xmlrpc");
+			try {
+				boolean ok = ((Boolean) xmlRpcClient
+						.call("AlarmService.fireAlarm"));
+				Toast.makeText(DMSMainActivity.this, ""+ok, Toast.LENGTH_SHORT).show();
+			} catch (XMLRPCException e) {
+				Log.e("XML RPC call", "Failed", e);
+			}
 		}
 
 		@Override
 		public void onTick(long millisUntilFinished) {
-			int seconds = (int) millisUntilFinished/1000;
+			int seconds = (int)Math.floor(millisUntilFinished/1000);
 			int minutes = seconds/60;
 			seconds = seconds%60;
 			
