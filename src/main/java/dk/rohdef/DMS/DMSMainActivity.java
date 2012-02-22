@@ -23,8 +23,14 @@ import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
@@ -40,7 +46,9 @@ import android.widget.Toast;
 
 public class DMSMainActivity extends Activity {
 
-    private static String TAG = "DMS";
+	private DMSCountDown countDown;
+	private DMSAlarmCountDown alarmCountDown;
+	private boolean running;
 
     /**
      * Called when the activity is first created.
@@ -51,7 +59,7 @@ public class DMSMainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		Log.i(TAG, "onCreate");
+        running = false;
         setContentView(R.layout.main);
     }
     
@@ -79,15 +87,78 @@ public class DMSMainActivity extends Activity {
 
     public void timerClickHandler(View view) {
     	Button timerButton = (Button) findViewById(view.getId());
+    
+    	// TODO should I lock this
+    	if (running) {
+    		alarmCountDown.cancel();
+    		countDown.cancel();
+    		timerButton.setText(R.string.startTimer);
+    		running = false;
+    	} else {
+    		running = true;
+    		
+    		long endTime = SystemClock.currentThreadTimeMillis() + (15*60*1000);
+    		long alarmTime = SystemClock.currentThreadTimeMillis() + (10*60*1000);
+    		
+    		countDown = new DMSCountDown(endTime);
+    		countDown.start();
+    		alarmCountDown = new DMSAlarmCountDown(alarmTime);
+			alarmCountDown.start();
+
+    		timerButton.setText(getString(R.string.stopTimer));
+    	}
+    }
+    
+    private class DMSAlarmCountDown extends CountDownTimer {
+    	private TextView timerText = (TextView) findViewById(R.id.timerText);
+    	public DMSAlarmCountDown(long miliesInFuture) {
+    		super(miliesInFuture, 500);
+    	}
     	
-		long endTime = SystemClock.currentThreadTimeMillis() + (1*1000);
+    	@Override
+    	public void onFinish() {
+    		timerText.setTextColor(Color.RED);
+    		
+    		Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+    		if (alert == null)
+    			alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    		if (alert == null)
+    			alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+    		
+    		MediaPlayer mediaPlayer = new MediaPlayer();
+    		try {
+				mediaPlayer.setDataSource(DMSMainActivity.this, alert);
+			} catch (IllegalArgumentException e) {
+				Log.e("Preparing alarm", "", e);
+			} catch (SecurityException e) {
+				Log.e("Preparing alarm", "", e);
+			} catch (IllegalStateException e) {
+				Log.e("Preparing alarm", "", e);
+			} catch (IOException e) {
+				Log.e("Preparing alarm", "", e);
+			}
+    		
+    		AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+    		audioManager.setStreamVolume(AudioManager.STREAM_ALARM,
+    				audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+    				AudioManager.FLAG_PLAY_SOUND);
+    		
+    		mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+    		mediaPlayer.setLooping(false);
+    		try {
+				mediaPlayer.prepare();
+			} catch (IllegalStateException e) {
+				Log.e("Preparing to play alarm", "", e);
+			} catch (IOException e) {
+				Log.e("Preparing to play alarm", "", e);
+			}
+    		mediaPlayer.start();
+    	}
     	
-    	Log.i("Button click", "Now is: " + SystemClock.currentThreadTimeMillis());
-    	Log.i("Button click", "Set to end at: " + endTime);
-    	DMSCountDown cd = new DMSCountDown(endTime);
-    	cd.start();
-    	
-    	timerButton.setText(getString(R.string.stopTimer));
+    	@Override
+    	public void onTick(long millisUntilFinished) {
+    		// DO nothing, not needed
+    	}
     }
     
     private class DMSCountDown extends CountDownTimer {
@@ -111,7 +182,7 @@ public class DMSMainActivity extends Activity {
 			byte[] signature = createSignature(phone, uuid);
 			
 			XMLRPCClient xmlRpcClient =
-					new XMLRPCClient("http://192.168.2.166:8080/AlarmService/xmlrpc");
+					new XMLRPCClient("http://asterisk2go:8080/AlarmService/xmlrpc");
 			try {
 				boolean ok = ((Boolean) xmlRpcClient
 						.callEx("AlarmService.fireAlarm",
