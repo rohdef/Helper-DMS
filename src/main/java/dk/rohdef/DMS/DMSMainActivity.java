@@ -45,7 +45,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class DMSMainActivity extends Activity {
-
+	private TextView timerText;
+	private Button timerButton;
+	
 	private DMSCountDown countDown;
 	private DMSAlarmCountDown alarmCountDown;
 	private boolean running;
@@ -61,6 +63,9 @@ public class DMSMainActivity extends Activity {
         super.onCreate(savedInstanceState);
         running = false;
         setContentView(R.layout.main);
+        
+        timerText = (TextView) findViewById(R.id.timerText);
+    	timerButton = (Button) findViewById(R.id.startStopButton);
     }
     
     @Override
@@ -86,8 +91,6 @@ public class DMSMainActivity extends Activity {
     }
 
     public void timerClickHandler(View view) {
-    	Button timerButton = (Button) findViewById(view.getId());
-    
     	// TODO should I lock this
     	if (running) {
     		alarmCountDown.cancel();
@@ -95,6 +98,7 @@ public class DMSMainActivity extends Activity {
     		timerButton.setText(R.string.startTimer);
     		running = false;
     	} else {
+    		timerText.setTextColor(Color.WHITE);
     		running = true;
     		
     		long endTime = SystemClock.currentThreadTimeMillis() + (15*60*1000);
@@ -110,7 +114,6 @@ public class DMSMainActivity extends Activity {
     }
     
     private class DMSAlarmCountDown extends CountDownTimer {
-    	private TextView timerText = (TextView) findViewById(R.id.timerText);
     	public DMSAlarmCountDown(long miliesInFuture) {
     		super(miliesInFuture, 500);
     	}
@@ -162,15 +165,14 @@ public class DMSMainActivity extends Activity {
     }
     
     private class DMSCountDown extends CountDownTimer {
-    	private TextView timerText = (TextView) findViewById(R.id.timerText);
-
     	public DMSCountDown(long millisInFuture) {
 			super(millisInFuture, 250);
 		}
-
     	
 		@Override
 		public void onFinish() {
+			timerButton.setText(R.string.startTimer);
+			timerText.setTextColor(Color.WHITE);
 			timerText.setText("END!");
 			
 			SharedPreferences preferences =
@@ -193,6 +195,8 @@ public class DMSMainActivity extends Activity {
 			} catch (XMLRPCException e) {
 				Log.e("XML RPC call", "Failed", e);
 			}
+			
+			running = false;
 		}
 
 		private byte[] createSignature(String phone, String uuid) {
